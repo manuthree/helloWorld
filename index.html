@@ -11,7 +11,18 @@
     <h1>Hello World!!!!</h1>
     <script>
       let deferredPrompt;
-
+      
+      if (navigator.serviceWorker.controller) {
+        console.log('[PWA Builder] active service worker found, no need to register')
+      } else {
+        //Register the ServiceWorker
+        navigator.serviceWorker.register('pwabuilder-sw.js').then(function(reg) {
+          console.log('Service worker has been registered for scope:'+ reg.scope);
+        }, function(error) {
+          console.log('Service worker registration failed:', error);
+        });
+      }
+      
       window.addEventListener('beforeinstallprompt', (e) => {
         // Prevent Chrome 67 and earlier from automatically showing the prompt
         e.preventDefault();
@@ -40,16 +51,13 @@
           deferredPrompt = null;
         });
       });
+      
+      window.addEventListener('appinstalled', (evt) => {
+        app.logEvent('a2hs', 'installed');
+      });
 
-      if (navigator.serviceWorker.controller) {
-        console.log('[PWA Builder] active service worker found, no need to register')
-      } else {
-        //Register the ServiceWorker
-        navigator.serviceWorker.register('pwabuilder-sw.js').then(function(reg) {
-          console.log('Service worker has been registered for scope:'+ reg.scope);
-        }, function(error) {
-          console.log('Service worker registration failed:', error);
-        });
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('display-mode is standalone');
       }
     </script>
   </body>
